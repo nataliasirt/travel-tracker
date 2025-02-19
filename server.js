@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 
 //routers
 import postRouter from './routers/postRouter.js';
-
+import authRouter from './routers/authRouter.js';
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -27,6 +27,7 @@ app.post('/', (req, res) => {
 });
 
 app.use('/api/v1/posts', postRouter);
+app.use('/api/v1/auth', authRouter);
 
 //Not Found Middleware
 app.use('*', (req, res) => {
