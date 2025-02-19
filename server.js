@@ -9,6 +9,8 @@ import mongoose from 'mongoose';
 //routers
 import postRouter from './routers/postRouter.js';
 import authRouter from './routers/authRouter.js';
+//middleware
+import errorHandlerMiddleware from './middleware/errorHandlerMiddleware.js';
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -35,10 +37,7 @@ app.use('*', (req, res) => {
 });
 
 //Error Middleware
-app.use((err, req, res, next) => {
-  console.log(err);
-  res.status(500).json({ msg: 'something went wrong' });
-});
+app.use(errorHandlerMiddleware);
 
 const port = process.env.PORT || 5100;
 try {

@@ -1,5 +1,6 @@
 import Post from '../models/PostModel.js';
 import {StatusCodes} from 'http-status-codes';
+import { NotFoundError } from '../customErrors.js';
 
 //GET ALL POSTS
 export const getAllPosts = async (req, res) => {
@@ -17,9 +18,7 @@ export const createPost = async (req, res) => {
 export const getPost = async (req, res) => {
     const { id } = req.params;
     const post = await Post.findById(id);
-    if (!post) {
-      return res.status(404).json({ msg: `no post with id ${id}` });
-    }
+    if (!post) throw new NotFoundError(`no post with id : ${id}`);
     res.status(StatusCodes.OK).json({ post });
   };
 
@@ -29,9 +28,7 @@ export const getPost = async (req, res) => {
     const updatePost = await Post.findByIdAndUpdate(id, req.body, {
       new: true,
     })
-    if (!updatePost) {
-      return res.status(404).json({ msg: `no post with id ${id}` });
-    }
+    if (!updatePost) throw new NotFoundError(`no post with id : ${id}`);
     res.status(StatusCodes.OK).json({ msg: 'post modified', post: updatePost });
   };
 
@@ -39,9 +36,7 @@ export const getPost = async (req, res) => {
   export const deletePost = async (req, res) => {
     const { id } = req.params;
     const removedPost = await Post.findByIdAndDelete(id);
-      if (!removedPost){
-        return res.status(404).json({ msg: `no post with id ${id}` });  // if post not found, return 404 error message. 404 means not found. 200 means OK. 400 means bad request. 500 means server error.
-      }
+    if (!removedPost) throw new NotFoundError(`no post with id : ${id}`);
   
     res.status(StatusCodes.OK).json({ msg: 'post deleted', post: removedPost });
   };
