@@ -1,6 +1,6 @@
 import Post from '../models/PostModel.js';
 import {StatusCodes} from 'http-status-codes';
-import { NotFoundError } from '../customErrors.js';
+import { NotFoundError } from '../errors/customErrors.js';
 
 //GET ALL POSTS
 export const getAllPosts = async (req, res) => {
