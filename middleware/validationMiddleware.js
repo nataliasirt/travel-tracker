@@ -1,11 +1,12 @@
-import { body, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
 import {
   BadRequestError,
   NotFoundError,
   UnauthorizedError,
 } from '../errors/customErrors.js';
+import { JOB_STATUS, JOB_TYPE } from '../utils/constants.js';
 import mongoose from 'mongoose';
-import Post from '../models/PostModel.js';
+import Job from '../models/JobModel.js';
 import User from '../models/UserModel.js';
 
 const withValidationErrors = (validateValues) => {
@@ -31,19 +32,26 @@ const withValidationErrors = (validateValues) => {
   ];
 };
 
-export const validatePostInput = withValidationErrors([
-  body('title').notEmpty().withMessage('title is required').isLength({ min: 3, max: 50 }).withMessage('name must be between 3 and 50 characters long').trim(),
-  body('location').notEmpty().withMessage('location is required').isLength({ min: 3, max: 50 }).withMessage('name must be between 3 and 50 characters long').trim(),
+export const validateJobInput = withValidationErrors([
+  body('company').notEmpty().withMessage('company is required'),
+  body('position').notEmpty().withMessage('position is required'),
+  body('jobLocation').notEmpty().withMessage('job location is required'),
+  body('jobStatus')
+    .isIn(Object.values(JOB_STATUS))
+    .withMessage('invalid status value'),
+  body('jobType')
+    .isIn(Object.values(JOB_TYPE))
+    .withMessage('invalid type value'),
 ]);
 
 export const validateIdParam = withValidationErrors([
   param('id').custom(async (value, { req }) => {
     const isValidMongoId = mongoose.Types.ObjectId.isValid(value);
     if (!isValidMongoId) throw new BadRequestError('invalid MongoDB id');
-    const post = await Post.findById(value);
-    if (!post) throw new NotFoundError(`no post with id ${value}`);
+    const job = await Job.findById(value);
+    if (!job) throw new NotFoundError(`no job with id ${value}`);
     const isAdmin = req.user.role === 'admin';
-    const isOwner = req.user.userId === post.createdBy.toString();
+    const isOwner = req.user.userId === job.createdBy.toString();
 
     if (!isAdmin && !isOwner)
       throw new UnauthorizedError('not authorized to access this route');
@@ -80,6 +88,7 @@ export const validateLoginInput = withValidationErrors([
     .withMessage('invalid email format'),
   body('password').notEmpty().withMessage('password is required'),
 ]);
+
 export const validateUpdateUserInput = withValidationErrors([
   body('name').notEmpty().withMessage('name is required'),
   body('email')
@@ -93,6 +102,7 @@ export const validateUpdateUserInput = withValidationErrors([
         throw new BadRequestError('email already exists');
       }
     }),
-    body('location').notEmpty().withMessage('location is required'),
-    body('lastName').notEmpty().withMessage('last name is required'),
-  ]);
+
+  body('location').notEmpty().withMessage('location is required'),
+  body('lastName').notEmpty().withMessage('last name is required'),
+]);
